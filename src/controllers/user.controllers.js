@@ -75,8 +75,8 @@ exports.update = (req, res) => {
     User.findByIdAndUpdate(req.params.id, {
         first_name: req.body.first_name, 
         last_name: req.body.last_name,
-        email: req.body.last_name,
-        phone: req.body.last_name
+        email: req.body.email,
+        phone: req.body.phone
     }, {new: true})
     .then(user => {
         if(!user) {
