@@ -1,7 +1,12 @@
 const User = require('../models/user.model.js');
+const jwt = require('jsonwebtoken');
+
+
+const accessTokenSecret = 'hdjfhdjfhjdhjsdh743846375';
 
 // Retrieve and return all users from the database.
 exports.findAll = (req, res) => {
+    console.log('authenticateJWT: '+  authenticateJWT);
     User.find()
     .then(users => {
         res.send(users);
@@ -26,18 +31,35 @@ exports.create = (req, res) => {
         first_name: req.body.first_name, 
         last_name: req.body.last_name,
         email: req.body.email,
-        phone: req.body.phone
+        phone: req.body.phone,
+        role: req.body.role
     });
 
     // Save user in the database
-    user.save()
-    .then(data => {
-        res.send(data);
-    }).catch(err => {
-        res.status(500).send({
-            message: err.message || "Something went wrong while creating new user."
+    if(req.body.role == 'admin'){
+        console.log("creating admin user...");
+        user.save()
+        .then(data => {
+                // Generate an access token
+                console.log("generating token...");
+                const accessToken = jwt.sign({ first_name: user.first_name,  role: user.role }, accessTokenSecret);
+                console.log(accessToken + ": accesstoken");
+                //res.send(data,accessToken);
+                res.json({
+                    accessToken
+                });
+        }).catch(err => {
+            res.status(500).send({
+                message: err.message || "Something went wrong while creating new user."
+            });
         });
-    });
+    }else{
+        console.log("creating member user...");
+
+    }
+
+    // create role=member
+    // mocha
 };
 
 // Find a single User with a id
@@ -76,7 +98,8 @@ exports.update = (req, res) => {
         first_name: req.body.first_name, 
         last_name: req.body.last_name,
         email: req.body.email,
-        phone: req.body.phone
+        phone: req.body.phone,
+        role: req.body.role
     }, {new: true})
     .then(user => {
         if(!user) {
@@ -118,3 +141,23 @@ exports.delete = (req, res) => {
         });
     });
 };
+
+const authenticateJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader) {
+        const token = authHeader;
+        console.log('token: ' + token);
+
+        jwt.verify(token, accessTokenSecret, (err, user) => {
+            if (err) {
+                return res.sendStatus(403);
+            }
+
+            req.user = user;
+            next();
+        });
+    } else {
+        res.sendStatus(401);
+    }
+}

@@ -1,8 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 
 // create express app
 const app = express();
+
+const accessTokenSecret = 'somerandomaccesstoken';
 
 // Setup server port
 const port = process.env.PORT || 4000;

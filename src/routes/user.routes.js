@@ -5,6 +5,9 @@ const userController = require('../controllers/user.controllers');
 // Retrieve all users
 router.get('/', userController.findAll);
 
+//create admin user
+router.post('/admin/',userController.create);
+
 // Create a new user
 router.post('/', userController.create);
 
